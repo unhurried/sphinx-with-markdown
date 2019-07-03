@@ -4,6 +4,7 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
+SPHINXINTL    ?= sphinx-intl
 SOURCEDIR     = source
 BUILDDIR      = build
 
@@ -13,13 +14,17 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+# Generate html for each language in doc/{language}.
 .PHONY: intl
 intl:
-	@$(SPHINXBUILD) -M gettext "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	sphinx-intl update -p build/gettext -l en
-	#make -e SPHINXOPTS="-D language='en'" html
-	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)/ja" -D language=ja
-	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)/en" -D language=en
+	$(MAKE) clean
+	$(MAKE) gettext
+	@$(SPHINXINTL) update -p "$(BUILDDIR)/gettext" -l en
+	mkdir "$(BUILDDIR)/doc"
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" -D language=ja
+	cp -r "$(BUILDDIR)/html" "$(BUILDDIR)/doc/ja"
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" -D language=en
+	cp -r "$(BUILDDIR)/html" "$(BUILDDIR)/doc/en"
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
